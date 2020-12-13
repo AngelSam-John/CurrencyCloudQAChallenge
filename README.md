@@ -31,6 +31,7 @@ Kindly use the below link for fixing issues when running using maven commands - 
 2. Install allure via terminal tab using *npm install -g allure-commandline —save-dev* command
 3. To view the report, execute the command *allure serve target/allure-results* via terminal tab in intellij.
 
+<img width="953" alt="Screenshot" src="https://user-images.githubusercontent.com/59449080/102023979-5aec8600-3d8f-11eb-84de-de5492c9a910.png">
 
 
 ## Framework on High level.
