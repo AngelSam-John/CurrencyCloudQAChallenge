@@ -10,10 +10,10 @@ import io.restassured.specification.RequestSpecification;
 import org.json.simple.JSONObject;
 import org.junit.Assert;
 
-public class conversionRateVerification {
+public class conversionRateVerification extends BaseStep {
 
     private static final String login_id = "mailangel08@gmail.com";
-    private static final String api_key = "21e2aba7117b79cc93b98f84b69f6e4def89ef48566b96475a2e9f1db566897b";
+    private static final String api_key = "440f058d969d61cad8225e0e50502af35777888cf4f438c12a668839743f6e56";
     private static final String BASE_URL = "https://devapi.currencycloud.com/v2";
     private static final String buy_currency = "USD";
     private static final String sell_currency = "GBP";
@@ -22,7 +22,7 @@ public class conversionRateVerification {
     private static final String term_agreement = "true";
 
     private static String token;
-   // private static String beneficiary_id;
+    // private static String beneficiary_id;
     private static Double buy_amount;
     private static Double sell_amount;
     private static Double rate;
@@ -48,9 +48,9 @@ public class conversionRateVerification {
         Response response = request.post("/authenticate/api");
 
         String jsonString = response.asString();
-        System.out.println(jsonString);
+        logger.info("Authentication Response : " + jsonString);
         token = JsonPath.from(jsonString).get("auth_token");
-        System.out.println(token);
+        logger.info("Authentication Token : " + token);
         Assert.assertEquals(200, response.getStatusCode());
 
 
@@ -72,7 +72,7 @@ public class conversionRateVerification {
 
 
         String jsonString = response.asString();
-        System.out.println(jsonString);
+        logger.info("Conversion Rate Details :" + jsonString);
         Assert.assertEquals(jsonString.contains("1500"), true);
         Assert.assertEquals(200, response.getStatusCode());
 
@@ -98,7 +98,7 @@ public class conversionRateVerification {
         Response response = request.post("/conversions/create");
 
         String jsonString = response.asString();
-        System.out.println(jsonString);
+        logger.info("Conversion Details : " + jsonString);
         conversion_id = JsonPath.from(jsonString).get("id");
         buy_amount = JsonPath.from(jsonString).getDouble("client_buy_amount");
         sell_amount = JsonPath.from(jsonString).getDouble("client_sell_amount");
