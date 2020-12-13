@@ -13,12 +13,12 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import org.junit.Assert;
 
-public class conversionRateVerification extends BaseStep {
+public class ConversionRateValidationStepDefinition extends BaseStep {
 
     private static ConversionResponse conversionResponse;
     public static String accountId;
 
-    public conversionRateVerification(TestContext testContext) {
+    public ConversionRateValidationStepDefinition(TestContext testContext) {
         super(testContext);
     }
 
