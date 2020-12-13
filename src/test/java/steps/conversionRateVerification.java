@@ -1,147 +1,86 @@
 package steps;
 
+import Requests.AuthenticationRequest;
+import Requests.ConversionRequest;
+import Responses.ConversionResponse;
+import cucumber.TestContext;
+import dataProvider.ConfigReader;
+import enums.Context;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
-import io.restassured.RestAssured;
-import io.restassured.path.json.JsonPath;
+import io.cucumber.java.en.When;
 import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.json.simple.JSONObject;
 import org.junit.Assert;
 
 public class conversionRateVerification extends BaseStep {
 
-    private static final String login_id = "mailangel08@gmail.com";
-    private static final String api_key = "440f058d969d61cad8225e0e50502af35777888cf4f438c12a668839743f6e56";
-    private static final String BASE_URL = "https://devapi.currencycloud.com/v2";
-    private static final String buy_currency = "USD";
-    private static final String sell_currency = "GBP";
-    private static final String fixed_side = "sell";
-    private static final String amount = "1500";
-    private static final String term_agreement = "true";
+    private static ConversionResponse conversionResponse;
+    public static String accountId;
 
-    private static String token;
-    // private static String beneficiary_id;
-    private static Double buy_amount;
-    private static Double sell_amount;
-    private static Double rate;
-    private static Double expectedAmount;
-    private static String conversion_id;
-    private static Response response;
-
-
-    @Given("I am an authorized user")
-    public void iAmAnAuthorizedUser() {
-
-        RestAssured.baseURI = BASE_URL;
-        RequestSpecification request = RestAssured.given();
-
-        request.header("Content-Type", "application/json");
-
-        JSONObject requestParams = new JSONObject();
-        requestParams.put("login_id", login_id);
-        requestParams.put("api_key", api_key);
-
-        request.body(requestParams.toJSONString());
-
-        Response response = request.post("/authenticate/api");
-
-        printOutputLog(response);
-        String jsonString = response.asString();
-        logger.info("Authentication Response : " + jsonString);
-        token = JsonPath.from(jsonString).get("auth_token");
-        logger.info("Authentication Token : " + token);
-        Assert.assertEquals(200, response.getStatusCode());
-
-
+    public conversionRateVerification(TestContext testContext) {
+        super(testContext);
     }
 
-    @Then("I query detailed rates for GBP to USD")
-    public void iQueryDetailedRatesForGBPToUSD() {
-        RestAssured.baseURI = BASE_URL;
-        RequestSpecification request = RestAssured.given();
+    @When("User generates an authentication token")
+    public void User_generates_authentication_token() {
+        logger.info(getScenarioContext().getContext(Context.LOGIN_ID).toString());
+        logger.info(getScenarioContext().getContext(Context.API_KEY).toString());
+        AuthenticationRequest authRequest = new AuthenticationRequest(getScenarioContext().getContext(Context.LOGIN_ID).toString(),
+                (String) getScenarioContext().getContext(Context.API_KEY));
+        getEndPoints().authenticateUser(authRequest);
+    }
 
-        request.header("X-Auth-Token", token)
-                .header("Content-Type", "application/json");
+    @Then("User queries detailed rates for conversion with {string} {string} {string} and {string}")
+    public void iQueryDetailedRatesForGBPToUSD(String buyCurrency, String sellCurrency, String fixedSide, String amount) {
 
-        Response response = request.queryParam("buy_currency", "USD")
-                .queryParam("sell_currency", "GBP")
-                .queryParam("fixed_side", "sell")
-                .queryParam("amount", "1500")
-                .get("/rates/detailed");
-
-
+        Response response = getEndPoints().getDetailedRates(buyCurrency, sellCurrency, fixedSide, amount);
         printOutputLog(response);
+        getScenarioContext().setContext(Context.DETAILED_RATE_RESPONSE, response);
         String jsonString = response.asString();
         logger.info("Conversion Rate Details :" + jsonString);
-        Assert.assertEquals(jsonString.contains("1500"), true);
-        Assert.assertEquals(200, response.getStatusCode());
 
     }
 
-    @Then("I Create a Quote for Conversion to sell GBP and buy USD")
-    public void iCreateAQuoteForConversionToSellGBPAndBuyUSD() {
-        RestAssured.baseURI = BASE_URL;
-        RequestSpecification request = RestAssured.given();
-
-        request.header("X-Auth-Token", token)
-                .header("Content-Type", "application/json");
-
-        JSONObject requestParams = new JSONObject();
-        requestParams.put("buy_currency", buy_currency);
-        requestParams.put("sell_currency", sell_currency);
-        requestParams.put("fixed_side", fixed_side);
-        requestParams.put("amount", amount);
-        requestParams.put("term_agreement", term_agreement);
-
-        request.body(requestParams.toJSONString());
-
-        Response response = request.post("/conversions/create");
-
+    @Then("User Creates a Conversion Quote to sell {string} and buy {string} with {string} and {string} and {string}")
+    public void iCreateAQuoteForConversionToSellGBPAndBuyUSD(String buyCurrency, String sellCurrency, String fixedSide, String amount, String termAgreement) {
+        int amountInInt = Integer.parseInt(amount);
+        boolean agreementBoolean = Boolean.parseBoolean(termAgreement);
+        ConversionRequest conversionRequest = new ConversionRequest(buyCurrency, sellCurrency, fixedSide, amountInInt, agreementBoolean);
+        Response response = getEndPoints().createConversion(conversionRequest);
         printOutputLog(response);
-        String jsonString = response.asString();
-        logger.info("Conversion Details : " + jsonString);
-        conversion_id = JsonPath.from(jsonString).get("id");
-        buy_amount = JsonPath.from(jsonString).getDouble("client_buy_amount");
-        sell_amount = JsonPath.from(jsonString).getDouble("client_sell_amount");
-        rate = JsonPath.from(jsonString).getDouble("core_rate");
-
+        conversionResponse = response.getBody().as(ConversionResponse.class);
+        getScenarioContext().setContext(Context.CONVERSION_RESPONSE, conversionResponse);
+        logger.info("Conversion Details : " + conversionResponse);
+        accountId = conversionResponse.id;
+        getScenarioContext().setContext(Context.BUY_AMOUNT, Double.parseDouble(conversionResponse.client_buy_amount));
+        getScenarioContext().setContext(Context.SELL_AMOUNT, Double.parseDouble(conversionResponse.client_sell_amount));
+        getScenarioContext().setContext(Context.RATE, Double.parseDouble(conversionResponse.core_rate));
         Assert.assertEquals(200, response.getStatusCode());
-
-
     }
 
-    @Then("verify buy amount equals to conversion rate")
+    @Then("User verifies buy amount is correct with respect to conversion rate")
     public void verify_buy_amount_equals_to_conversion_rate() {
-        expectedAmount = sell_amount * rate;
-        Assert.assertEquals(expectedAmount, buy_amount);
+        Double price = (Double) getScenarioContext().getContext(Context.SELL_AMOUNT);
+        Double rate = (Double) getScenarioContext().getContext(Context.RATE);
+        Double actualAmount = (Double) getScenarioContext().getContext(Context.BUY_AMOUNT);
+        Double expectedAmount = price * rate;
+        Assert.assertEquals(expectedAmount, actualAmount);
 
     }
 
-    @Then("verify buy amount not equals to conversion rate")
-    public void verifyBuyAmountNotEqualsToConversionRate() {
-        expectedAmount = sell_amount * rate;
-        Assert.assertNotEquals(expectedAmount, buy_amount);
-
-    }
-
-
-    @And("End the Session")
+    @And("User disconnects the Session")
     public void endTheSession() {
-
-        RestAssured.baseURI = BASE_URL;
-        RequestSpecification request = RestAssured.given();
-
-        request.header("X-Auth-Token", token)
-                .header("Content-Type", "application/json");
-
-        Response response = request.post("authenticate/close_session");
-
+        Response response = getEndPoints().endSession();
         printOutputLog(response);
-        String jsonString = response.asString();
         Assert.assertEquals(200, response.getStatusCode());
     }
 
+    @And("User should receive response code as {int}")
+    public void validateResponseCode(int responseCode) {
+        Response response = (Response) getScenarioContext().getContext(Context.DETAILED_RATE_RESPONSE);
+        Assert.assertEquals(responseCode, response.getStatusCode());
+        logger.info("Actual Response Code " + response.getStatusCode());
+    }
 
 }
