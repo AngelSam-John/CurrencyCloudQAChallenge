@@ -47,6 +47,7 @@ public class conversionRateVerification extends BaseStep {
 
         Response response = request.post("/authenticate/api");
 
+        printOutputLog(response);
         String jsonString = response.asString();
         logger.info("Authentication Response : " + jsonString);
         token = JsonPath.from(jsonString).get("auth_token");
@@ -71,6 +72,7 @@ public class conversionRateVerification extends BaseStep {
                 .get("/rates/detailed");
 
 
+        printOutputLog(response);
         String jsonString = response.asString();
         logger.info("Conversion Rate Details :" + jsonString);
         Assert.assertEquals(jsonString.contains("1500"), true);
@@ -97,6 +99,7 @@ public class conversionRateVerification extends BaseStep {
 
         Response response = request.post("/conversions/create");
 
+        printOutputLog(response);
         String jsonString = response.asString();
         logger.info("Conversion Details : " + jsonString);
         conversion_id = JsonPath.from(jsonString).get("id");
@@ -135,6 +138,7 @@ public class conversionRateVerification extends BaseStep {
 
         Response response = request.post("authenticate/close_session");
 
+        printOutputLog(response);
         String jsonString = response.asString();
         Assert.assertEquals(200, response.getStatusCode());
     }

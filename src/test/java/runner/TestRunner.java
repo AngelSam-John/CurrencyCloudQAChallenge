@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
         features = "src/test/java/features/conversionVerification.feature",
         glue = {"steps"},
         monochrome = true,
-        plugin =  {"pretty", "html:target/cucumber-reports/cucumber-pretty",
+        plugin =  {"io.qameta.allure.cucumber4jvm.AllureCucumber4Jvm",
                 "json:target/cucumber-reports/CucumberTestReport.json", "rerun:target/cucumber-reports/rerun.txt"}
 )
 public class TestRunner {
