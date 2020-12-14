@@ -28,7 +28,7 @@ public class EndPoints {
         requestSpecification.header("X-Auth-Token", tokenResponse.auth_token);
     }
 
-    public Response getDetailedRates(String sellCurrency,String buyCurrency,String fixedSide,String amount) {
+    public Response getDetailedRates(String buyCurrency,String sellCurrency,String fixedSide,String amount) {
 
         Response response = requestSpecification.queryParam("buy_currency", buyCurrency)
                 .queryParam("sell_currency",sellCurrency)

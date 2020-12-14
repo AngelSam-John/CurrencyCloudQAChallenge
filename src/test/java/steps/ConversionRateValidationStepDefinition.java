@@ -42,7 +42,7 @@ public class ConversionRateValidationStepDefinition extends BaseStep {
 
     }
 
-    @Then("User Creates a Conversion Quote to sell {string} and buy {string} with {string} and {string} and {string}")
+    @Then("User Creates a Conversion Quote to buy {string} and sell {string} with {string} and {string} and {string}")
     public void iCreateAQuoteForConversionToSellGBPAndBuyUSD(String buyCurrency, String sellCurrency, String fixedSide, String amount, String termAgreement) {
         int amountInInt = Integer.parseInt(amount);
         boolean agreementBoolean = Boolean.parseBoolean(termAgreement);

@@ -33,4 +33,5 @@ public class ConversionResponse {
     public String unique_request_id;
     public String created_at;
     public String updated_at;
+    public String unallocated_funds;
 }
