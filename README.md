@@ -7,6 +7,12 @@ The tech stack used for this framework creation are:
 3. Maven as the build tool
 4. IntelliJ as the preferred IDE for writing java code.
 
+I have chosen RestAssured as the tool to validate API's as it is open source test framework and it can be written in java. Programming language I am familiar with along with Junit as the test framework.
+
+Also, I have used BDD approach with cucumber - as it helps in understanding the test steps easy for non technical people as it is written in simple English language.
+
+Allure report is used for reporting as it gives clear insights on request responses and it is completely open source.
+
 ## Getting Started. Required softwares.
 
 1. Install JDK 7 or above
