@@ -5,6 +5,8 @@ import Requests.ConversionRequest;
 import Responses.AuthenticationResponse;
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
@@ -17,7 +19,7 @@ public class EndPoints {
         RestAssured.baseURI = baseUrl;
         requestSpecification = RestAssured.given();
         requestSpecification.header("Content-Type", "application/json");
-        requestSpecification.filter(new AllureRestAssured());
+
     }
 
     public void authenticateUser(AuthenticationRequest authRequest) {
@@ -33,8 +35,7 @@ public class EndPoints {
         Response response = requestSpecification.queryParam("buy_currency", buyCurrency)
                 .queryParam("sell_currency",sellCurrency)
                 .queryParam("fixed_side",fixedSide)
-                .queryParam("amount", amount)
-                .get(Route.getDetailedRates());
+                .queryParam("amount", amount).get(Route.getDetailedRates());
         return response;
     }
 
